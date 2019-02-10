@@ -1,0 +1,6 @@
+/extra
+/rsconnect
+/documentation
+*.DS_Store
+*.Rhistory
+*.RData
