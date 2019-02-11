@@ -2,17 +2,22 @@ rm(list=ls())
 setwd("~/NYCDSA/R Data Analysis/Shiny project/Expenditure")
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
 library(tidyverse)
+library(dplyr)
 library(DT)
+library(stats)
+library(plotly)
 library(leaflet)
+library(RColorBrewer)
 library(googleVis)
 library(maps)
 library(geojsonio)
-library(RColorBrewer)
-library(stats)
-library(shinyWidgets)
-library(dplyr)
 
+
+# national by source of funding
+# absolute $, per capita $, as % total personal healthcare spend
+source("proc/makenat2.R")
 
 # amount in millions, 11 spend categories over 58 years
 nat1 = read.csv("./data/national_tidy.csv", stringsAsFactors = FALSE) %>% 
@@ -59,6 +64,7 @@ nat1_pct_gdp <- nat1_pct_gdp %>% select(-us_pop,-gdp)
 # combine all the tables
 nat1_df = rbind(nat1_raw, nat1_percap, nat1_pct_cat, nat1_pct_gdp)
 
+
 # Calculate per-capita location quotient for each year and spend category (LQ = state_percapita / national_percapita )
 st_percap = read.csv("./data/state_per_capita.csv", stringsAsFactors = FALSE) %>% rename( st_amount = amount)
 
@@ -81,6 +87,11 @@ st_pop = read.csv("./data/state_population.csv", stringsAsFactors = FALSE) %>%
 
 st_df = inner_join(st_percap, st_agg, by = c("category","state","year"))
 st_df = inner_join(st_df, st_pop, by = c("state","year"))
+
+rm( nat1_st, st_agg, st_pop, st_percap )
+rm( nat1, nat1_raw, nat1_percap, nat1_pct_cat, nat1_pct_gdp, pop_gdp)
+
+
 
 
 

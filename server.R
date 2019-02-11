@@ -9,6 +9,7 @@ shinyServer(function(input, output){
     bins = reactiveValues()
     labs = reactiveValues()
     ltitle = reactiveValues()
+    vaxistxt = reactiveValues()
     
     # Reactive Data For National Trends by Spend Category Line Chart
     nat1_df_chart = reactive({
@@ -21,6 +22,32 @@ shinyServer(function(input, output){
         
     })
     
+    nat2_df_chart = reactive({
+        req(input$time2)
+        req(input$sofund2)
+        req(input$metric2)
+        
+        nat2_df %>% filter( year >= input$time2[1] &
+                                year <= input$time2[2] & metric == input$metric2 ) %>% select(year, input$sofund2) 
+        
+    })
+    
+    # National Trends by Source of Funding Bar Chart with ggplot2
+    output$nat2_gglot <- renderPlot({
+        plotdata2 = gather(nat2_df_chart(),key = fund_type, value = value, input$sofund2)
+
+        ggplot(data = plotdata2, aes(x = year,y = value)) +
+            geom_col(aes(fill = fund_type) )
+    })
+    
+    observe({
+        if (input$metric1 == "PctOf_GDP"){
+            vaxistxt$h = "{title: 'Metric Value', titleTextStyle: {fontSize: 16} , format: 'percent' }"
+        } else{
+            vaxistxt$h = "{title: 'Metric Value', titleTextStyle: {fontSize: 16} }"
+        }
+    })
+    
     # National Trends by Spend Category Line Chart with googlevis
     output$nat1_gvis <- renderGvis({
         gvisLineChart(
@@ -29,9 +56,11 @@ shinyServer(function(input, output){
                 title ="US Personal Healthcare Expenditure by Category",
                 width = "automatic",
                 height = "500px",
-                vAxis = "{title: 'metric' }",
-                hAxis = "{title: 'Year'}",
-                animation = "{startup: true}"
+                chartArea = "{left: '100', right:'180'}",
+                vAxis = vaxistxt$h,
+                hAxis = "{title: 'Year', titleTextStyle: {fontSize: 16} }",
+                animation = "{startup: true}",
+                legend = "{textStyle: {fontSize: 12}}"
             )
         )
     })
@@ -45,24 +74,24 @@ shinyServer(function(input, output){
     # })
     
     st_df_map = reactive({
-        st_df_select <- st_df %>% filter( year == input$year2 & category == input$cat2 ) %>%
-            select(state, input$metric2)
+        st_df_select <- st_df %>% filter( year == input$year3 & category == input$cat3 ) %>%
+            select(state, input$metric3)
     })
     
     observe({
-        bins$b = quantile(st_df_map()[,input$metric2], probs = seq(0,1,0.2) )
-        if (input$metric2 == "percap_dollars" ){
+        bins$b = quantile(st_df_map()[,input$metric3], probs = seq(0,1,0.2) )
+        if (input$metric3 == "percap_dollars" ){
             labs$a = "<strong>%s</strong><br/>%g $ per capita"
             ltitle$t = "USD per capita"
-        } else if (input$metric2 == "total_dollars_millions") {
+        } else if (input$metric3 == "total_dollars_millions") {
             labs$a = "<strong>%s</strong><br/>%g million $" 
             ltitle$t = "Total spend (Millions $)"
              
-        } else if (input$metric2 == "population"){    
+        } else if (input$metric3 == "population"){    
             labs$a = "<strong>%s</strong><br/>%g millions people"
             ltitle$t = "Population (millions)"
             
-        } else if (input$metric2 == "percap_lq"){
+        } else if (input$metric3 == "percap_lq"){
             labs$a = "<strong>%s</strong><br/>%g relative to national"
             ltitle$t = "Per capita spend relative to nation"
         }
@@ -73,11 +102,11 @@ shinyServer(function(input, output){
         states0 = states
         states0@data <- left_join(states0@data, st_df_map(), by="state")
         
-        pal <- colorBin("BuPu", domain = states0@data[,input$metric2], bins = bins$b)
+        pal <- colorBin("BuPu", domain = states0@data[,input$metric3], bins = bins$b)
         
         
         labels <- sprintf(labs$a, states0$state, 
-                          states0@data[,input$metric2]
+                          states0@data[,input$metric3]
         ) %>% lapply(htmltools::HTML)
         
         
@@ -90,7 +119,7 @@ shinyServer(function(input, output){
                 accessToken = Sys.getenv('MAPBOX_ACCESS_TOKEN'))
                 ) %>% 
             addPolygons(
-                fillColor = ~pal(states0@data[,input$metric2]),
+                fillColor = ~pal(states0@data[,input$metric3]),
                 weight = 2,
                 opacity = 3,
                 color = "white",
@@ -108,7 +137,7 @@ shinyServer(function(input, output){
                     textsize = "14px",
                     direction = "auto")
             ) %>%
-            addLegend(pal = pal, values = ~states0@data[,input$metric2], opacity = 0.7, title = ltitle$t,
+            addLegend(pal = pal, values = ~states0@data[,input$metric3], opacity = 0.7, title = ltitle$t,
                       position = "bottomleft")
         
     })
