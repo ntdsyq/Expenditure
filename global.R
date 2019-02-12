@@ -1,5 +1,5 @@
-rm(list=ls())
-setwd("~/NYCDSA/R Data Analysis/Shiny project/Expenditure")
+#rm(list=ls())
+#setwd("~/NYCDSA/R Data Analysis/Shiny project/Expenditure")
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
@@ -7,6 +7,7 @@ library(tidyverse)
 library(dplyr)
 library(stats)
 library(ggplot2)
+library(plotly)
 library(ggthemes)
 library(leaflet)
 library(RColorBrewer)
@@ -20,7 +21,7 @@ library(geojsonio)
 source("proc/makenat2.R")
 
 # amount in millions, 11 spend categories over 58 years
-nat1 = read.csv("./data/national_tidy.csv", stringsAsFactors = FALSE) %>% 
+nat1 = read.csv("data/national_tidy.csv", stringsAsFactors = FALSE) %>% 
       filter( use_cat == "Y", year <= 2017, fund_type == "total") %>%  # no population and gdp estimates for projected years
       select( category, year, amount ) %>%
       rename( total = amount )
@@ -41,7 +42,7 @@ nat1_raw$metric = "Total_Dollars_Millions"
 
 
 # population in millions, gdp in billions
-pop_gdp = read.csv("./data/us population and gdp.csv", stringsAsFactors = FALSE, skip = 1 )
+pop_gdp = read.csv("data/us population and gdp.csv", stringsAsFactors = FALSE, skip = 1 )
 
 # calculate per capita dollars
 nat1_percap = inner_join(nat1_raw, pop_gdp, by = "year") 
@@ -66,7 +67,7 @@ nat1_df = rbind(nat1_raw, nat1_percap, nat1_pct_cat, nat1_pct_gdp)
 
 
 # Calculate per-capita location quotient for each year and spend category (LQ = state_percapita / national_percapita )
-st_percap = read.csv("./data/state_per_capita.csv", stringsAsFactors = FALSE) %>% rename( st_amount = amount)
+st_percap = read.csv("data/state_per_capita.csv", stringsAsFactors = FALSE) %>% rename( st_amount = amount)
 
 # combine Prescription_Drug and Non-Durable_Medical_Products in national file for location quotient calculation
 nat1_st <- nat1_percap %>% mutate(Prescription_Drugs_and_Other_Nondurable_Medical_Products = 
@@ -80,9 +81,9 @@ st_percap <- st_percap %>% mutate( percap_lq = st_amount / nat_amount )
 st_percap <- st_percap %>% rename( percap_dollars = st_amount ) %>% select( -nat_amount)
 
 # create state level metrics for shading the map
-st_agg = read.csv("./data/state_aggregate.csv", stringsAsFactors = FALSE) %>% 
+st_agg = read.csv("data/state_aggregate.csv", stringsAsFactors = FALSE) %>% 
         select(-region) %>% rename( total_dollars_millions = amount )
-st_pop = read.csv("./data/state_population.csv", stringsAsFactors = FALSE) %>% 
+st_pop = read.csv("data/state_population.csv", stringsAsFactors = FALSE) %>% 
         select(-c(region,category)) %>% rename( population = amount ) %>% mutate( population = population/1000 )
 
 st_df = inner_join(st_percap, st_agg, by = c("category","state","year"))

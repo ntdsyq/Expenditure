@@ -1,4 +1,4 @@
-library(ggthemes)
+
 
 states = geojsonio::geojson_read("data/gz_2010_us_040_00_500k_noPR.json", what = "sp")
 names(states) = tolower(names(states))
