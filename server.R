@@ -1,4 +1,4 @@
-
+library(ggthemes)
 
 states = geojsonio::geojson_read("data/gz_2010_us_040_00_500k_noPR.json", what = "sp")
 names(states) = tolower(names(states))
@@ -32,12 +32,23 @@ shinyServer(function(input, output){
         
     })
     
-    # National Trends by Source of Funding Bar Chart with ggplot2
-    output$nat2_gglot <- renderPlot({
-        plotdata2 = gather(nat2_df_chart(),key = fund_type, value = value, input$sofund2)
-
-        ggplot(data = plotdata2, aes(x = year,y = value)) +
-            geom_col(aes(fill = fund_type) )
+    # National Trends by Source of Funding Bar Chart with ggplot2 and plotly
+    output$nat2_gglot <- renderPlotly({
+        plotdata2 = gather(nat2_df_chart(),key = Fund.Type, value = metric.value, input$sofund2)
+        
+        g <- ggplot(data = plotdata2, aes(x = year,y = metric.value)) +
+            geom_col(aes(fill = Fund.Type) ) + 
+            ylab("Metric Value") + theme_bw()
+            # theme(axis.title.x = element_text(face= "bold", size = 14),
+            #       axis.title.y = element_text(face= "bold", size = 14),
+            #       axis.text.x = element_text(size = 12),
+            #       axis.text.y = element_text(size = 12),
+            #       legend.text = element_text(size = 14),
+            #       legend.title = element_text(size = 14)) +
+            guides(fill=guide_legend(title="Fund Type"))
+        #labs(fill = "Fund Type")  or scale_fill_discrete(name = "Fund Type") works too
+        
+        ggplotly(g, tooltip = c("year","metric.value")) 
     })
     
     observe({

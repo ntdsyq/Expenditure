@@ -1,17 +1,5 @@
-# library(shiny)
-# library(shinydashboard)
-# library(tidyverse)
-# library(DT)
-# library(leaflet)
-# library(googleVis)
-# library(maps)
-# library(geojsonio)
-# library(RColorBrewer)
-# library(stats)
-# library(shinyWidgets)
-# library(shinythemes)
 
- 
+
 shinyUI(
     fluidPage(
     theme = "custom.css",
@@ -129,8 +117,10 @@ shinyUI(
                      ),
                      fluidRow(
                          column( width = 12, box( title = "National Trends by Source of Funding", 
-                                                  solidHeader = T, status = "info", width = NULL, height = 600,
-                                                  plotOutput("nat2_gglot")) )
+                                                  solidHeader = T, status = "info", width = NULL, height = 450,
+                                                  #plotOutput("nat2_gglot")
+                                                  plotlyOutput("nat2_gglot")
+                                                  ) )
                      )
             ),
             tabItem(tabName = "map",
@@ -172,18 +162,18 @@ shinyUI(
                     ),
                     
                     fluidRow(
-                        column( width = 9,
+                        column( width = 12,
                                 box( title = "US States Personal Healthcare Spend Map", solidHeader = T, 
                                      status = "info", width = NULL, height = "auto",
                                      leafletOutput("usmap", height = 450)
-                                ) ),
+                                ) )
                         
                         # to add compounded annual growth rate for the selected time period
-                        column( width = 3,
-                                box( title = "Top 10 States by Metric", solidHeader = T, 
-                                     status = "info", width = NULL, height = 500 
-                                     
-                                ) )
+                        # column( width = 3,
+                        #         box( title = "Top 10 States by Metric", solidHeader = T, 
+                        #              status = "info", width = NULL, height = 500 
+                        #              
+                        #         ) )
                         
                     )
                     
