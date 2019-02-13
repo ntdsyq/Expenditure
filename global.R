@@ -31,8 +31,7 @@ nat1_cat = unique(nat1$category)
 nat1_default_cat = c("Personal_Health_Care", 
                     "Hospital_Care",
                     "Physician_and_Clinical",
-                    "Home_Health_Care",
-                    "Nursing_Home_Care"
+                    "Prescription_Drug"
                     )
 
 # create summary tables for each metric by spend categories

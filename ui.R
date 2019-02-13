@@ -43,7 +43,7 @@ shinyUI(
                                           label = "Select one or more categories",
                                           choices = nat1_cat,
                                           multiple = TRUE,
-                                          selected = nat1_default_cat,
+                                          selected = nat1_cat,
                                           options =  list(
                                               "actions-box" = TRUE)
                                       )
@@ -63,12 +63,27 @@ shinyUI(
                      ),
                      
                      fluidRow(
-                         column( width = 12,
-                                 box( title = "National Trends by Spend Category", solidHeader = T, 
-                                      status = "info", width = NULL, height = 600, 
-                                      htmlOutput("nat1_gvis") 
-                                      # plotOutput("nat1_gglot")
-                                 ) )
+                         # column( width = 12,
+                         #         box( title = "National Trends by Spend Category", solidHeader = T,
+                         #              status = "info", width = NULL, height = 600,
+                         #              htmlOutput("nat1_gvis")
+                         #              # plotOutput("nat1_gglot")
+                         #         ) )
+                         
+                         column(
+                             width = 12,
+                             tabBox(
+                                 title = "National Expenditure by Spend Category over Selected Time Period",
+                                 id = "nat1tab",
+                                 #side = "right",
+                                 width = NULL,
+                                 height = 600,
+                                 tabPanel("Value for Selected Metric",
+                                          htmlOutput("nat1_gvis") ),
+                                 tabPanel("Year over Year Change",
+                                          htmlOutput("nat1_growth_gvis") )
+                             )
+                         )
                          
                          # to add compounded annual growth rate for the selected time period
                          # column( width = 3,
@@ -77,7 +92,7 @@ shinyUI(
                          #            
                          #         ) )
                          
-                     )
+                )     
             ),
             tabItem( tabName = "nat_fund",
                      fluidRow(

@@ -22,6 +22,14 @@ shinyServer(function(input, output){
         
     })
     
+    nat1_df_growth = reactive({
+        df = nat1_df_chart()
+        nat1_growth = cbind(df$year[2:nrow(df)], 
+                            df[2:nrow(df),2:ncol(df)] / df[1:nrow(df)-1,2:ncol(df)] - 1)
+        colnames(nat1_growth)[1] = "year"
+        nat1_growth
+    })
+    
     nat2_df_chart = reactive({
         req(input$time2)
         req(input$sofund2)
@@ -32,25 +40,7 @@ shinyServer(function(input, output){
         
     })
     
-    # National Trends by Source of Funding Bar Chart with ggplot2 and plotly
-    output$nat2_gglot <- renderPlotly({
-        plotdata2 = gather(nat2_df_chart(),key = Fund.Type, value = metric.value, input$sofund2)
-        
-        g <- ggplot(data = plotdata2, aes(x = year,y = metric.value)) +
-            geom_col(aes(fill = Fund.Type) ) + 
-            ylab("Metric Value") + theme_bw()
-            # theme(axis.title.x = element_text(face= "bold", size = 14),
-            #       axis.title.y = element_text(face= "bold", size = 14),
-            #       axis.text.x = element_text(size = 12),
-            #       axis.text.y = element_text(size = 12),
-            #       legend.text = element_text(size = 14),
-            #       legend.title = element_text(size = 14)) +
-            guides(fill=guide_legend(title="Fund Type"))
-        #labs(fill = "Fund Type")  or scale_fill_discrete(name = "Fund Type") works too
-        
-        ggplotly(g, tooltip = c("year","metric.value")) 
-    })
-    
+  
     observe({
         if (input$metric1 == "PctOf_GDP"){
             vaxistxt$h = "{title: 'Metric Value', titleTextStyle: {fontSize: 16} , format: 'percent' }"
@@ -75,6 +65,42 @@ shinyServer(function(input, output){
             )
         )
     })
+    
+    output$nat1_growth_gvis <- renderGvis({
+        gvisLineChart(
+            nat1_df_growth(),
+            options = list(
+                title ="US Personal Healthcare Expenditure by Category - YoY Change",
+                width = "automatic",
+                height = "500px",
+                chartArea = "{left: '100', right:'180'}",
+                vAxis = "{title: 'YoY Change', titleTextStyle: {fontSize: 16} }",
+                hAxis = "{title: 'Year', titleTextStyle: {fontSize: 16} }",
+                animation = "{startup: true}",
+                legend = "{textStyle: {fontSize: 12}}"
+            )
+        )
+    })
+    
+    # National Trends by Source of Funding Bar Chart with ggplot2 and plotly
+    output$nat2_gglot <- renderPlotly({
+        plotdata2 = gather(nat2_df_chart(),key = Fund.Type, value = metric.value, input$sofund2)
+        
+        g <- ggplot(data = plotdata2, aes(x = year,y = metric.value)) +
+            geom_col(aes(fill = Fund.Type) ) + 
+            ylab("Metric Value") + theme_bw()
+        # theme(axis.title.x = element_text(face= "bold", size = 14),
+        #       axis.title.y = element_text(face= "bold", size = 14),
+        #       axis.text.x = element_text(size = 12),
+        #       axis.text.y = element_text(size = 12),
+        #       legend.text = element_text(size = 14),
+        #       legend.title = element_text(size = 14)) +
+        guides(fill=guide_legend(title="Fund Type"))
+        #labs(fill = "Fund Type")  or scale_fill_discrete(name = "Fund Type") works too
+        
+        ggplotly(g, tooltip = c("year","metric.value")) 
+    })
+    
     
     # National Trends by Spend Category Line Chart with ggplot2
     # output$nat1_gglot <- renderPlot({
