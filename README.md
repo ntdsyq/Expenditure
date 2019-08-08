@@ -1,4 +1,3 @@
-# Expenditure
 In this project I created an R Shiny app visualization for personal healthcare expenditure data (source: cms.gov) at national (1960-2017) and state level (1991-2014). The user can explore personal healthcare spending trends over time, by category of spending and source of funding. Those trends are the result of changes in social-economical conditions and policy. 
 Link to the R Shiny app: https://dataspeak.shinyapps.io/HealthSpend/
 
